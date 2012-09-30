@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using Newtonsoft.Json.Linq;
 namespace AwesomeCanvas
 {
-    public class History : IEnumerable<Dictionary<string, object>>
+    public class History : IEnumerable<JToken>
     {
         List<UndoLevel> undoLevels = new List<UndoLevel>();
         class UndoLevel
         {
-            public List<Dictionary<string, object>> commands = new List<Dictionary<string, object>>();
+            public List<JToken> commands = new List<JToken>();
         }
         UndoLevel current {
             get { return undoLevels[undoLevels.Count - 1]; }
         }
-        public void StoreUndoData(Dictionary<string, object> pData) {
+        public void StoreUndoData(JToken pData) {
             if (undoLevels.Count == 0)
                 BeginNewUndoLevel();
 
@@ -35,9 +35,9 @@ namespace AwesomeCanvas
         }
 
 
-        public IEnumerator<Dictionary<string, object>> GetEnumerator() {
-            foreach (UndoLevel l in undoLevels) { 
-                foreach(Dictionary<string, object> d in l.commands){
+        public IEnumerator<JToken> GetEnumerator() {
+            foreach (UndoLevel l in undoLevels) {
+                foreach (JToken d in l.commands) {
                     yield return d;
                 }
             }

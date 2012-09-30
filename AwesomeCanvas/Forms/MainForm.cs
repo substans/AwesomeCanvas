@@ -98,7 +98,7 @@ namespace AwesomeCanvas
         }
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
             SaveFileDialog saveAsDialogue = new SaveFileDialog();
-            saveAsDialogue.Filter = "Awsome Canvas Save|.awsomeSave";
+            saveAsDialogue.Filter = "Awesome Canvas Save|.AwesomeSave";
             saveAsDialogue.FileOk += (object dialogue, CancelEventArgs arguments) => { 
                 if (arguments.Cancel) { 
                     return; 

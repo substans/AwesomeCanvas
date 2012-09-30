@@ -320,7 +320,7 @@
             this.toolStripSeparator3,
             this.toolStripLabel1,
             this.toolStripNumericUpDownItem1,
-            this.toolStripTrackBarItem1, 
+            this.toolStripTrackBarItem1,
             this.toolStripColourSwatch});
             this.brushTools.Location = new System.Drawing.Point(38, 0);
             this.brushTools.Name = "brushTools";
@@ -365,18 +365,18 @@
             this.toolStripNumericUpDownItem1.Name = "toolStripNumericUpDownItem1";
             this.toolStripNumericUpDownItem1.Size = new System.Drawing.Size(41, 23);
             this.toolStripNumericUpDownItem1.Text = "0";
-            //
-            // toolStripColourSwatch
-            //
-            this.toolStripColourSwatch.Name = "toolStripColourSwatch";
-            this.toolStripColourSwatch.Size = new System.Drawing.Size(50, 23);
-            this.toolStripColourSwatch.Text = "colour";
             // 
             // toolStripTrackBarItem1
             // 
             this.toolStripTrackBarItem1.Name = "toolStripTrackBarItem1";
             this.toolStripTrackBarItem1.Size = new System.Drawing.Size(200, 23);
             this.toolStripTrackBarItem1.Text = "toolStripTrackBarItem1";
+            // 
+            // toolStripColourSwatch
+            // 
+            this.toolStripColourSwatch.Name = "toolStripColourSwatch";
+            this.toolStripColourSwatch.Size = new System.Drawing.Size(0, 23);
+            this.toolStripColourSwatch.Text = "colour";
             // 
             // toolPanelBottom
             // 

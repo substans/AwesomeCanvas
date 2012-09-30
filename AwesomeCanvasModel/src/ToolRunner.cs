@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using Newtonsoft.Json.Linq;
 namespace AwesomeCanvas
 {
-    public delegate void FunctionEventHandler(ToolRunner pTarget, string pFunctionName, Dictionary<string, object> inputMessage);
+    public delegate void FunctionEventHandler(ToolRunner pTarget, string pFunctionName, JToken inputMessage);
     public class ToolRunner
     {
         public bool FunctionEventsEnabled {get;set;}
@@ -27,21 +27,24 @@ namespace AwesomeCanvas
         }
         
         // Decypher the JSON command and execute the corrasponding function
-        public void ParseJSON(string pJson) {
+        public void ParseJSON(string pJsonArray) {
             if (m_picture == null)
                 return;
+            JArray jarr = JArray.Parse(pJsonArray);
+            
+
             //Console.WriteLine(pJson);
-            Dictionary<string, object>[] input = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>[]>(pJson);
-            ExecuteCommands(input);
+            Dictionary<string, object>[] input = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>[]>(pJsonArray);
+            ExecuteCommands(jarr);
 
         }
 
-        void ToolDown(Dictionary<string, object> inputMessage) {
-            float pressure = Convert.ToSingle(inputMessage["pressure"]);
-            int x = Convert.ToInt32(inputMessage["x"]);
-            int y = Convert.ToInt32(inputMessage["y"]);
-            Tool tool = m_tools[inputMessage["tool"] as string]; //swap tool on tool down
-            string layerID = inputMessage["layer"] as string;
+        void ToolDown(JToken inputMessage) {
+            float pressure = inputMessage.Value<float>("pressure");
+            int x = inputMessage.Value<int>("x");
+            int y = inputMessage.Value<int>("y");
+            Tool tool = m_tools[inputMessage.Value<string>("tool")]; //swap tool on tool down
+            string layerID = inputMessage.Value<string>("layer");
             m_currentLayer = m_picture.GetLayer(layerID);
             m_currentTool = tool;
             m_currentTool.Down(x, y, pressure, m_picture, m_currentLayer, inputMessage["options"]);
@@ -49,57 +52,57 @@ namespace AwesomeCanvas
             m_currentLayer.History.StoreUndoData(inputMessage);
         }
 
-        void ToolMove(Dictionary<string, object> inputMessage) {
-            float pressure = Convert.ToSingle(inputMessage["pressure"]);
-            int x = Convert.ToInt32(inputMessage["x"]);
-            int y = Convert.ToInt32(inputMessage["y"]);
+        void ToolMove(JToken inputMessage) {
+            float pressure = inputMessage.Value<float>("pressure");
+            int x =inputMessage.Value<int>("x");
+            int y = inputMessage.Value<int>("y");
             m_currentTool.Move(x, y, pressure);
             m_currentLayer.History.StoreUndoData(inputMessage);
         }
 
-        void ToolUp(Dictionary<string, object> inputMessage) {
-            float pressure = Convert.ToSingle(inputMessage["pressure"]);
-            int x = Convert.ToInt32(inputMessage["x"]);
-            int y = Convert.ToInt32(inputMessage["y"]);
+        void ToolUp(JToken inputMessage) {
+            float pressure = inputMessage.Value<float>("pressure");
+            int x = inputMessage.Value<int>("x");
+            int y = inputMessage.Value<int>("y");
             m_currentTool.Up(x, y, pressure);
             m_currentLayer.History.StoreUndoData(inputMessage);
             m_currentTool = null;
             m_currentLayer = null;        
         }
-        void Undo(Dictionary<string, object> inputMessage) {
-            string layerID = inputMessage["layer"] as string;
+        void Undo(JToken inputMessage) {
+            string layerID = inputMessage.Value<string>("layer");
             Layer l = m_picture.GetLayer(layerID);
             m_picture.Clear(layerID);
             l.History.PopUndoLevel();
-            Dictionary<string, object>[] h = l.History.ToArray();//important to copy to array since the history will be modified!
+            JToken[] h = l.History.ToArray();//important to copy to array since the history will be modified!
             l.History.Clear();
             FunctionEventsEnabled = false; //we disable events so that the gui doesn't update while we re-paint the image
             ExecuteCommands(h);
             FunctionEventsEnabled = true;
         }
-        void RenameLayer(Dictionary<string, object> inputMessage) {
-            string layerID = inputMessage["layer"] as string;
-            m_picture.GetLayer(layerID).Name = inputMessage["name"] as string;
+        void RenameLayer(JToken inputMessage) {
+            string layerID = inputMessage.Value<string>("layer");
+            m_picture.GetLayer(layerID).Name = inputMessage.Value<string>("name");
         }
-        void RemoveLayer(Dictionary<string, object> inputMessage) {
-            string layerID = inputMessage["layer"] as string;
+        void RemoveLayer(JToken inputMessage) {
+            string layerID = inputMessage.Value<string>("layer");
             m_picture.RemoveLayer(layerID);
         }
-        void ReorderLayers(Dictionary<string, object> inputMessage) {
+        void ReorderLayers(JToken inputMessage) {
             var t = inputMessage["order"] as Newtonsoft.Json.Linq.JToken;
             m_picture.Reorder_layers( t.ToObject<string[]>());
         
         }
-        void ClearLayer(Dictionary<string, object> inputMessage) {
-            string layerID = inputMessage["layer"] as string;
+        void ClearLayer(JToken inputMessage) {
+            string layerID = inputMessage.Value<string>("layer");
             m_picture.Clear(layerID);
             m_picture.GetLayer(layerID).History.StoreUndoData(inputMessage);
         }
-        void ExecuteCommands(IEnumerable<Dictionary<string, object>> pInput) 
+        void ExecuteCommands(IEnumerable<JToken> pInput) 
         {
-            foreach (Dictionary<string, object>inputMessage in pInput) 
+            foreach (JToken inputMessage in pInput) 
             {
-                string functionName = inputMessage["function"] as string;
+                string functionName = inputMessage.Value<string>("func");
                 switch (functionName) 
                 {
                     case "tool_down": //tool_down comes with all the tool options
@@ -120,7 +123,7 @@ namespace AwesomeCanvas
                     Undo(inputMessage);
                     break;
                     case "create_layer":
-                    m_picture.AddLayer(inputMessage["layer"] as string);
+                    m_picture.AddLayer(inputMessage.Value<string>("layer"));
                     break;
                     case "remove_layer":
                     RemoveLayer(inputMessage);

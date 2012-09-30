@@ -2,25 +2,37 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 namespace AwesomeCanvas
 {
     public class EzJson
     {
         List<Dictionary<string, object>> l = new List<Dictionary<string, object>>();
+        JTokenWriter writer;
+        public EzJson() {
+            writer = new JTokenWriter();
+            writer.WriteStartArray();
+
+        }
         public void BeginFunction(string pName)
         {
-            l.Add(new Dictionary<string, object>());
-            current.Add("function", pName.ToLower());
+            writer.WriteStartObject();
+            writer.WritePropertyName("func");
+            writer.WriteValue(pName);
         }
-        public void AddData(string pKey, object pData) {
-            current.Add(pKey.ToLower(), pData);
+        public void AddField(string pKey, object pData) {
+            writer.WritePropertyName(pKey);
+            writer.WriteValue(pData.ToString());
+        }
+        public void AddObject(string pKey, object pData) {
+            writer.WritePropertyName(pKey);
+            var r = new JTokenReader( Newtonsoft.Json.Linq.JToken.FromObject(pData));
+            writer.WriteToken(r);
         }
         public Dictionary<string, object> current { get { return l.Last(); } }
         public string Finish() {
-            Dictionary<string, object>[] arr = l.ToArray();
-            l.Clear();
-            return JsonConvert.SerializeObject(arr);
+            writer.WriteEndArray();
+            return writer.Token.ToString();
         }
     }
 }
