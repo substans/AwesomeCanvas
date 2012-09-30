@@ -81,7 +81,7 @@ namespace AwesomeCanvas
                     j.AddObject("options", m_mainForm.GetPenOptions());
                 break;
                 default:
-                    j.AddField("options", null);
+                    j.AddField("options", "");
                 break;
             }
             m_toolRunner.ParseJSON(j.Finish());
