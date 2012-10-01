@@ -76,6 +76,7 @@ namespace AwesomeCanvas
             foreach (Layer l in m_layers) {
                 Clear(l.ID);
             }
+            m_layers.Clear();
         }
 
         internal void RemoveLayer(string pLayerID) {

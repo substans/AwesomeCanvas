@@ -30,16 +30,27 @@ namespace AwesomeCanvas
         {
             m_controller = new Controller(pCanvasWindow.GetPicture(), pCanvasWindow);
             m_controller.NewUserConnected = OnNewUserConnected;
-            m_controller.Connect();
             m_mainForm = pMainForm;
             m_canvasWindow = pCanvasWindow;
             m_canvasWindow.m_session = this;
-            //m_layerControl = pLayerControlForm;
-            //m_layerControl.SetCanvasSession(this);
+            m_layerControl = pLayerControlForm;
+            m_layerControl.SetCanvasSession(this);
             //setup first layer       
             m_controller.CreateLocalUser();
-            selectedLayerID = Gui_CreateLayer();
-            //Gui_ClearSelectedLayer();
+            ResetCanvas();
+            m_controller.Connect(ResetCanvas);
+        }
+
+        void ResetCanvas() {
+            if (m_canvasWindow.InvokeRequired) {
+                m_canvasWindow.Invoke(new Action(ResetCanvas));
+
+            }
+            else {
+                m_canvasWindow.GetPicture().ClearAll();
+                selectedLayerID = Gui_CreateLayer();
+               // Gui_ClearSelectedLayer();
+            }
         }
 
         void OnNewUserConnected(ToolRunner pNewToolrunner) {
@@ -51,10 +62,10 @@ namespace AwesomeCanvas
                 pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_canvasWindow.Redraw(pToolRunner); }, "tool_down", "tool_up", "tool_move", "undo", "clear", "reorder_layers", "remove_layer");
 
                 //add listeners for all functions that should rebuild the layer list
-                //pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_layerControl.RebuildLayerControls(); }, "reorder_layers", "rename_layer", "remove_layer", "create_layer");
+                pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_layerControl.RebuildLayerControls(); }, "reorder_layers", "rename_layer", "remove_layer", "create_layer");
                 //ToolRunner pTarget, string pFunctionName, JToken inputMessage
                 //add listeners for all functions that should update a layer thumbnail
-                //pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_layerControl.UpdateThumbnail(pToken.Value<string>("layer")); }, "tool_up", "undo", "clear");
+                pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_layerControl.UpdateThumbnail(pToken.Value<string>("layer")); }, "tool_up", "undo", "clear");
 
                 //add listeners for updating the status bar (:
                 pNewToolrunner.AddFunctionListener((pA, pB, pC) => { m_mainForm.SetStatus("last action: " + pB); }, "tool_down", "tool_up", "tool_move", "undo", "clear", "reorder_layers", "remove_layer", "create_layer");

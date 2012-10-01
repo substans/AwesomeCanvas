@@ -106,7 +106,7 @@ namespace AwesomeCanvas
             foreach (Layer layer in m_canvasSession.GetPicture().layers) {
                 UpdateThumbnail(layer.ID);
             }
-            if (m_layerControls.ContainsKey(selectedIndex)) {
+            if (selectedIndex != null && m_layerControls.ContainsKey(selectedIndex)) {
                 OnLayerSelectionChange(m_layerControls[selectedIndex]);
             }
             //LayerDisplayPanel.ResumeLayout();

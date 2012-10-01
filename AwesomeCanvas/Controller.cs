@@ -20,21 +20,22 @@ namespace AwesomeCanvas
         public Controller(Picture pPicture, CanvasWindow pWindow) {
             m_picture = pPicture;
             m_canvasWindow = pWindow;
+            client = null;
         }
-        public void Connect() {
-            client = new AsyncTcpClient();
+        public void Connect( Action pOnConnectionComplete ) {
+            client = new AsyncTcpClient("217.147.82.190", 9150, pOnConnectionComplete);
             client.JsonMessageDispatcher = OnJsonArrived;
-            client.MessageLogger += (o) => { Console.WriteLine(o); };
-            client.ConnectTo("217.147.82.190", 9150);
-            //client.ConnectTo("192.168.0.16", 9150);
+            client.LogDispatcher += (o) => { Console.WriteLine(o); };
+            client.Connect();
+            //client.ConnectTo("192.168.0.16", 9150, pOnConnectionComplete);
         }
         public void CreateLocalUser() {
             AddUser(LOCAL_USER);
         }
 
         public void GuiInput( JToken pData ) {
-            if (client != null && client.connected) {
-                client.SendString(pData.ToString());
+            if (client != null && client.connected != false) {
+                client.Write(pData.ToString());
             }
             _users[LOCAL_USER].ParseJSON(pData);
         }
@@ -75,6 +76,12 @@ namespace AwesomeCanvas
         private void Execute(string p, JToken pToken ) {
             ToolRunner t = _users[p];
             t.ParseJSON(pToken);
+        }
+
+        internal void EmptyDrawing() {
+
+            
+            
         }
     }
 }
