@@ -11,7 +11,7 @@ namespace AwesomeCanvas
         JTokenWriter writer;
         public EzJson() {
             writer = new JTokenWriter();
-            writer.WriteStartArray();
+            //writer.WriteStartArray();
 
         }
         public void BeginFunction(string pName)
@@ -30,9 +30,9 @@ namespace AwesomeCanvas
             writer.WriteToken(r);
         }
         public Dictionary<string, object> current { get { return l.Last(); } }
-        public string Finish() {
-            writer.WriteEndArray();
-            return writer.Token.ToString();
+        public JToken Finish() {
+            //writer.WriteEndArray();
+            return writer.Token;
         }
     }
 }

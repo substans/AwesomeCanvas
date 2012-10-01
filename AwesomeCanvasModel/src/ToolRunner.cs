@@ -27,15 +27,13 @@ namespace AwesomeCanvas
         }
         
         // Decypher the JSON command and execute the corrasponding function
-        public void ParseJSON(string pJsonArray) {
+        public void ParseJSON(JToken pToken) {
             if (m_picture == null)
                 return;
-            JArray jarr = JArray.Parse(pJsonArray);
-            
-
-            //Console.WriteLine(pJson);
-            Dictionary<string, object>[] input = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>[]>(pJsonArray);
-            ExecuteCommands(jarr);
+            if (pToken.Type == JTokenType.Array)
+                ExecuteCommands(pToken as JArray);
+            else
+                ExecuteCommands(new JToken[] { pToken });
 
         }
 

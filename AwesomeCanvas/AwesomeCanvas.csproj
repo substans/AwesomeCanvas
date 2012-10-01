@@ -74,6 +74,7 @@
   <ItemGroup>
     <Compile Include="CanvasSession.cs" />
     <Compile Include="AsyncTcpClient.cs" />
+    <Compile Include="Controller.cs" />
     <Compile Include="Forms\CanvasWindow.cs">
       <SubType>Form</SubType>
     </Compile>
