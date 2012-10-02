@@ -9,7 +9,7 @@ namespace AwesomeCanvas
     {
         public delegate void ToolrunnerHandler( ToolRunner p);
 
-        const string LOCAL_USER = "local_user";
+        public const string LOCAL_USER = "local_user";
         Dictionary<string, ToolRunner> _users = new Dictionary<string, ToolRunner>();
         CanvasWindow m_canvasWindow;
         Picture m_picture;

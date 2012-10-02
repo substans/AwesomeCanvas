@@ -93,13 +93,25 @@ namespace AwesomeCanvas
         }
 
         internal void Reorder_layers(string[] pNewLayerOrder) {
-            Debug.Assert(pNewLayerOrder.Length == m_layers.Count, "layer order does not match setup");
+            //Debug.Assert(pNewLayerOrder.Length == m_layers.Count, "layer order does not match setup");
             Layer[] oldOrder = m_layers.ToArray();
             m_layers.Clear();
             foreach (string s in pNewLayerOrder) {
-               Layer t = oldOrder.First((l) => { return l.ID == s; });
-               Debug.Assert(t != null, "layer order does not match setup");
-               m_layers.Add(t);
+                Layer t = null;
+                try {
+                    t = oldOrder.First((l) => { return l.ID == s; });
+                    m_layers.Add(t);
+                }
+                catch (InvalidOperationException e) {//layer did not exist
+                   //layer did not exist!
+                }
+              // Debug.Assert(t != null, "layer order does not match setup");
+               
+            }
+            //there are 
+            foreach (Layer l in oldOrder) {
+                if (!m_layers.Contains(l))
+                    m_layers.Add(l);
             }
         }
     }

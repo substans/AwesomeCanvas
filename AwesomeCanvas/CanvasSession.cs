@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using AwesomeCanvas;
 using System.IO;
+using System.Globalization;
 using Newtonsoft.Json.Linq;
 using WintabDN;
 namespace AwesomeCanvas
@@ -58,17 +59,28 @@ namespace AwesomeCanvas
                 m_canvasWindow.Invoke(new Controller.ToolrunnerHandler(OnNewUserConnected), pNewToolrunner);
             }
             else {
-                //add listeners for all functions that should redraw the main canvas
-                pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_canvasWindow.Redraw(pToolRunner); }, "tool_down", "tool_up", "tool_move", "undo", "clear", "reorder_layers", "remove_layer");
+                if (pNewToolrunner.username == Controller.LOCAL_USER) {
+                    //add listeners for all functions that should redraw the main canvas
+                    pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_canvasWindow.Redraw(pToolRunner); }, "tool_down", "tool_up", "tool_move", "undo", "clear", "reorder_layers", "remove_layer");
+                    //add listeners for all functions that should rebuild the layer list
+                    pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_layerControl.RebuildLayerControls(); }, "reorder_layers", "rename_layer", "remove_layer", "create_layer");
+                    //ToolRunner pTarget, string pFunctionName, JToken inputMessage
+                    //add listeners for all functions that should update a layer thumbnail
+                    pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_layerControl.UpdateThumbnail(pToken.Value<string>("layer")); }, "tool_up", "undo", "clear");
+                    //add listeners for updating the status bar (:
+                    pNewToolrunner.AddFunctionListener((pA, pB, pC) => { m_mainForm.SetStatus("last action: " + pB); }, "tool_down", "tool_up", "tool_move", "undo", "clear", "reorder_layers", "remove_layer", "create_layer");
+                }
+                else { //network users don't push so many events
+                    //add listeners for all functions that should redraw the main canvas
+                    pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_canvasWindow.Redraw(pToolRunner); }, "tool_up", "undo", "clear", "reorder_layers", "remove_layer");
+                    //add listeners for all functions that should rebuild the layer list
+                    pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_layerControl.RebuildLayerControls(); }, "reorder_layers", "rename_layer", "remove_layer", "create_layer");
+                    //ToolRunner pTarget, string pFunctionName, JToken inputMessage
+                    //add listeners for all functions that should update a layer thumbnail
+                    pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_layerControl.UpdateThumbnail(pToken.Value<string>("layer")); }, "tool_up", "undo", "clear");
+                }
+                    
 
-                //add listeners for all functions that should rebuild the layer list
-                pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_layerControl.RebuildLayerControls(); }, "reorder_layers", "rename_layer", "remove_layer", "create_layer");
-                //ToolRunner pTarget, string pFunctionName, JToken inputMessage
-                //add listeners for all functions that should update a layer thumbnail
-                pNewToolrunner.AddFunctionListener((pToolRunner, pFuncName, pToken) => { m_layerControl.UpdateThumbnail(pToken.Value<string>("layer")); }, "tool_up", "undo", "clear");
-
-                //add listeners for updating the status bar (:
-                pNewToolrunner.AddFunctionListener((pA, pB, pC) => { m_mainForm.SetStatus("last action: " + pB); }, "tool_down", "tool_up", "tool_move", "undo", "clear", "reorder_layers", "remove_layer", "create_layer");
             }
         }
 
@@ -88,7 +100,7 @@ namespace AwesomeCanvas
             string toolName = m_mainForm.GetToolName();
             EzJson j = new EzJson();
             j.BeginFunction("tool_down");
-            j.AddField("pressure", (pressure).ToString());
+            j.AddField("pressure", pressure.ToString(CultureInfo.InvariantCulture.NumberFormat));
             j.AddField("x", (int)(x / m_canvasWindow.magnification));
             j.AddField("y", (int)(y / m_canvasWindow.magnification));
             j.AddField("layer", selectedLayerID);
@@ -111,7 +123,7 @@ namespace AwesomeCanvas
         {
             EzJson j = new EzJson();
             j.BeginFunction("tool_move");
-            j.AddField("pressure", (pressure).ToString());
+            j.AddField("pressure", pressure.ToString(CultureInfo.InvariantCulture.NumberFormat));
             j.AddField("x", (int)(x / m_canvasWindow.magnification));
             j.AddField("y", (int)(y / m_canvasWindow.magnification));
             m_controller.GuiInput( j.Finish());
@@ -168,7 +180,7 @@ namespace AwesomeCanvas
         internal void Gui_SetLayerOrder(string[] pOrderedIDs) {
             EzJson j = new EzJson();
             j.BeginFunction("reorder_layers");
-            j.AddField("order", pOrderedIDs);
+            j.AddObject("order", pOrderedIDs);
             m_controller.GuiInput(j.Finish());
         }
 

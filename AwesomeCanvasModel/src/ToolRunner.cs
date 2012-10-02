@@ -11,7 +11,7 @@ namespace AwesomeCanvas
         public bool FunctionEventsEnabled {get;set;}
         Dictionary<string, List<FunctionEventHandler>> _functionHandlers = new Dictionary<string,List<FunctionEventHandler>>();
         Picture m_picture;
-        string m_username;
+        public string username{get; private set;}
         Dictionary<string, Tool> m_tools = new Dictionary<string, Tool>();
         
         Tool m_currentTool = null; //when making strokes we cache these for optimization
@@ -21,7 +21,7 @@ namespace AwesomeCanvas
             m_tools.Add("brush", new BrushTool(this));
             m_tools.Add("pen", new PenTool(this));
             m_tools.Add("pointer", new PointerTool(this));
-            m_username = pUsername;
+            username = pUsername;
             m_picture = pPicture;
             FunctionEventsEnabled = true;
         }
@@ -87,8 +87,9 @@ namespace AwesomeCanvas
             m_picture.RemoveLayer(layerID);
         }
         void ReorderLayers(JToken inputMessage) {
-            var t = inputMessage["order"] as Newtonsoft.Json.Linq.JToken;
-            m_picture.Reorder_layers( t.ToObject<string[]>());
+            JArray arr = inputMessage["order"] as JArray;
+            var t = arr.Values<string>().ToArray<string>();
+            m_picture.Reorder_layers(t);
         
         }
         void ClearLayer(JToken inputMessage) {
